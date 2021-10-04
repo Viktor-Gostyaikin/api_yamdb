@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Reviews
+from .models import Review
 
 
-class ReviewsAdmin(admin.ModelAdmin):
-    pass
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('id', 'text', 'author', 'score', 'title_id')
 
 
-admin.site.register(Reviews, ReviewsAdmin)
+admin.site.register(Review, ReviewAdmin)
