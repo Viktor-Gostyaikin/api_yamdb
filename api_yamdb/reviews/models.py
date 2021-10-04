@@ -19,7 +19,7 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.CharField(max_length=10000)
-    author = models.OneToOneField(
+    author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
     score = models.SmallIntegerField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
