@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Title
-from .serializers import ReviewSerializer, CommentSerializer
+from users.models import User
+from .serializers import ReviewSerializer, CommentSerializer, UserSerializer
 from .permissions import AuthorOrModeratorOrAdminOrReadOnly
 
 
@@ -56,3 +57,8 @@ class CommentViewSet(viewsets.ModelViewSet):
                 Title, id=self.kwargs['title_id']
             )
         )
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
