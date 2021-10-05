@@ -1,10 +1,8 @@
 import csv
-
 from django.core.management.base import BaseCommand
-
 import requests
 
-from users.models import User
+from reviews.models import Comment
 
 
 class Command(BaseCommand):
@@ -17,6 +15,6 @@ class Command(BaseCommand):
         response = requests.get(link)
         reader = csv.DictReader(response.text.splitlines())
 
-        User.objects.bulk_create([User(**{k.lower(): v for k, v in data.items()}) for data in reader])
+        Comment.objects.bulk_create([Comment(**{k.lower(): v for k, v in data.items()}) for data in reader])
 
         self.stdout.write(self.style.SUCCESS('Successfully loaded'))
