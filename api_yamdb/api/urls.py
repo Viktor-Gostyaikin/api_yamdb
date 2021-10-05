@@ -1,7 +1,7 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework import routers
-
 from .views import ReviewViewSet, CommentViewSet
+
 
 router = routers.DefaultRouter()
 
@@ -18,6 +18,14 @@ router.register(
 )
 
 
+v1_patterns = [
+    # path('', include('djoser.urls')),
+    # path('', include('djoser.urls.jwt')),
+    # path('', include(router_v1.urls)),
+    # path('api-token-auth/', views.obtain_auth_token),
+]
 urlpatterns = [
-    path('', include(router.urls)),
+    path('v1/', include(router.urls)),
+    path('v1/', include('djoser.urls')),
+    path('v1/', include('djoser.urls.jwt')),
 ]
