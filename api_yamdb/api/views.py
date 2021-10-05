@@ -5,7 +5,7 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Title
 from .serializers import ReviewSerializer, CommentSerializer
-from .permissions import AuthorOrModeratorOrReadOnly
+from .permissions import AuthorOrModeratorOrAdminOrReadOnly
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -17,7 +17,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOrModeratorOrReadOnly,)
+    permission_classes = (AuthorOrModeratorOrAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -42,7 +42,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOrModeratorOrReadOnly)
+    permission_classes = (AuthorOrModeratorOrAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
