@@ -16,7 +16,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    text = models.CharField(max_length=10000)
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -39,7 +39,7 @@ class Comment(models.Model):
         related_name='comments',
         db_index=True
     )
-    text = models.TextField(max_lengt=10000)
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
