@@ -1,6 +1,6 @@
 from django.db import models
-from users.models import User
 
+from users.models import User
 
 class Title(models.Model):
     name = None
@@ -38,6 +38,7 @@ class Comment(models.Model):
         db_index=True
     )
     text = models.TextField()
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -49,6 +50,7 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
+
 
 
 class Category(models.Model):
