@@ -9,11 +9,16 @@ from .permissions import AuthorOrModeratorOrReadOnly
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+
+    """
+    Предоставляет возможность работать с отзывами к произведениям:
+    читать, создавать, редактировать, удалять.
+    Координирует разрешения на доступ.
+    """
+
     serializer_class = ReviewSerializer
     permission_classes = (AuthorOrModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    ordering_fields = ('score',)
-    ordering = ('-score',)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -29,6 +34,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+
+    """
+    Предоставляет возможность работать с комментариями к отзывам:
+    читать, создавать, редактировать, удалять.
+    Координирует разрешения на доступ по ролям.
+    """
+
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrModeratorOrReadOnly)
     pagination_class = LimitOffsetPagination

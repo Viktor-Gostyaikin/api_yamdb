@@ -1,16 +1,12 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.relations import SlugRelatedField
 
 from reviews.models import Review, Comment
 
 
-User = get_user_model()
-
-
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
+    author = SlugRelatedField(
         read_only=True, slug_field='user_id'
     )
 
