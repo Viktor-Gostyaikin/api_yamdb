@@ -2,6 +2,7 @@ from django.db import models
 
 from users.models import User
 
+
 class Title(models.Model):
     name = None
     year = None
@@ -50,7 +51,6 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
-
 
 
 class Category(models.Model):
