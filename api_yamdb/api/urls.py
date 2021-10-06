@@ -1,31 +1,26 @@
 from django.urls import include, path
 from rest_framework import routers
-from .views import ReviewViewSet, CommentViewSet
+from .views import ReviewViewSet, CommentViewSet, UserViewSet
 
 
-router = routers.DefaultRouter()
+router_v1 = routers.DefaultRouter()
 
-router.register(
+router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
     basename='reviews'
 )
-
-router.register(
+router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentViewSet,
     basename='comments'
 )
+router_v1.register(r'users', UserViewSet)
 
 
 v1_patterns = [
-    # path('', include('djoser.urls')),
-    # path('', include('djoser.urls.jwt')),
-    # path('', include(router_v1.urls)),
-    # path('api-token-auth/', views.obtain_auth_token),
+    path('', include(router_v1.urls)),
 ]
 urlpatterns = [
-    path('v1/', include(router.urls)),
-    path('v1/', include('djoser.urls')),
-    path('v1/', include('djoser.urls.jwt')),
+    path('v1/', include(v1_patterns)),
 ]
