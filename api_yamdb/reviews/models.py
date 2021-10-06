@@ -54,8 +54,15 @@ class Comment(models.Model):
 
 
 class Category(models.Model):
-    name = None
-    slug = None
+    name = models.CharField(max_length=256, unique=True,
+                            verbose_name='категория')
+    slug = models.SlugField(max_length=50, unique=True)
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+    
+    def __str__(self):
+        return self.name
 
 
 class Genre(models.Model):

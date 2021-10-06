@@ -1,12 +1,18 @@
+from re import search
+from django.contrib.auth import models
+from django.db.models import query
 from rest_framework import viewsets
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin
+from rest_framework.viewsets import GenericViewSet
 
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.filters import SearchFilter
 
-from reviews.models import Title
+from reviews.models import Title, Category
 from users.models import User
-from .serializers import ReviewSerializer, CommentSerializer, UserSerializer
-from .permissions import AuthorOrModeratorOrAdminOrReadOnly
+from .serializers import ReviewSerializer, CommentSerializer, UserSerializer, CategorySerializer
+from .permissions import AuthorOrModeratorOrAdminOrReadOnly, IsSafeMethodOrIsAdmin
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -62,3 +68,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class CategoryViewSet(ListModelMixin, CreateModelMixin, 
+                      DestroyModelMixin, GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ('name')
+    # permission_classes = IsSafeMethodOrIsAdmin
