@@ -45,15 +45,15 @@ class Title(models.Model):
 
 
 class Genre_Title(models.Model):
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
-        related_name="titles", default=1)
-    genre_id = models.ForeignKey(
-        Genre, related_name="ganre", on_delete=models.CASCADE, default=1)
+        related_name="titles")
+    genre = models.ForeignKey(
+        Genre, related_name="ganre", on_delete=models.CASCADE)
 
 
 class Review(models.Model):
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='title_id_reviews'
@@ -69,10 +69,11 @@ class Review(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['title_id', 'author'],
+            models.UniqueConstraint(fields=['title', 'author'],
                                     name='unique_review')
         ]
-
+    def __str__(self):
+        return self.score
 
 class Comment(models.Model):
     review = models.ForeignKey(
