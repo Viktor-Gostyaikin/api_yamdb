@@ -1,6 +1,7 @@
 from django.db import models
 
 from users.models import User
+from .validators import validator_year
 
 
 class Category(models.Model):
@@ -31,10 +32,13 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256, verbose_name='произведения')
     year = models.IntegerField(
-        verbose_name="Год издания", db_index=True, default='2021')
+        verbose_name='Год издания', db_index=True, default='2021',
+        validators=[validator_year])
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
-        blank=True, null=True, related_name="titles")
+        blank=True, null=True, related_name='titles')
+    genre = models.ManyToManyField(Genre, related_name='titles')
+    description = models.CharField(max_length=256, null=True)
 
     class Meta:
         verbose_name = 'Произведение'
