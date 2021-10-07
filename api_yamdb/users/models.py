@@ -29,6 +29,7 @@ class User(AbstractUser):
     role = models.CharField(
         'Роль', max_length=9, choices=ROLE, default=USER
     )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
