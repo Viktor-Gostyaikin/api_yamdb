@@ -23,7 +23,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
-        review = title.reviews.all()
+        review = title.title_reviews.all()
         return review
 
     def perform_create(self, serializer):

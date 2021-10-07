@@ -5,7 +5,7 @@ from users.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=256, unique=True,
-                            verbose_name='категория')
+                            verbose_name='Категория')
     slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
@@ -29,12 +29,12 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256, verbose_name='произведения')
+    name = models.CharField(max_length=256, verbose_name='Произведение')
     year = models.IntegerField(
-        verbose_name="Год издания", db_index=True, default='2021')
+        verbose_name='Год издания', db_index=True, default='2021')
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
-        blank=True, null=True, related_name="titles")
+        blank=True, null=True, related_name='titles', db_index=True)
 
     class Meta:
         verbose_name = 'Произведение'
@@ -47,22 +47,24 @@ class Title(models.Model):
 class Genre_Title(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
-        related_name="titles")
+        related_name='titles')
     genre = models.ForeignKey(
-        Genre, related_name="ganre", on_delete=models.CASCADE)
+        Genre, related_name='genre', on_delete=models.CASCADE)
 
 
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='title_id_reviews'
+        related_name='title_reviews',
+        db_index=True
     )
     text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_reviews'
+        related_name='author_reviews',
+        db_index=True
     )
     score = models.SmallIntegerField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
@@ -72,8 +74,10 @@ class Review(models.Model):
             models.UniqueConstraint(fields=['title', 'author'],
                                     name='unique_review')
         ]
+
     def __str__(self):
         return self.score
+
 
 class Comment(models.Model):
     review = models.ForeignKey(

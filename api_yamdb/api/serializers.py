@@ -9,11 +9,11 @@ from users.models import User
 class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(
         read_only=True,
-        slug_field='user_id',
+        slug_field='id',
     )
-    title_id = SlugRelatedField(
+    title = SlugRelatedField(
         read_only=True,
-        slug_field='title_id',
+        slug_field='id',
     )
 
     class Meta:
@@ -23,21 +23,21 @@ class ReviewSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(),
-                fields=('author', 'title_id')
+                fields=('author', 'title')
             )
         ]
 
     def get_average_score(self, obj):
-        reviews = Review.objects.filter(obj.title_id)
+        reviews = Review.objects.filter(obj.title)
         return round(sum(reviews.score) / len(reviews.score))
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(
-        read_only=True, slug_field='user_id'
+        read_only=True, slug_field='id'
     )
     review = SlugRelatedField(
-        read_only=True, slug_field='review_id'
+        read_only=True, slug_field='id'
     )
 
     class Meta:
