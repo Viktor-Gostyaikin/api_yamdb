@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework.relations import SlugRelatedField
 
 from reviews.models import Review, Comment
@@ -10,26 +10,26 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(
         read_only=True,
         slug_field='id',
-    )
-    title = SlugRelatedField(
-        read_only=True,
-        slug_field='id',
+        default=serializers.CurrentUserDefault(),
     )
 
     class Meta:
         model = Review
-        fields = ('__all__')
+        fields = ('text', 'author', 'score', 'pub_date')
 
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title')
-            )
-        ]
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        if Review.objects.filter(
+            author=self.context['request'].user,
+            title=self.context['view'].kwargs.get('title_id')
+        ).exists():
+            raise ValidationError('Вы уже оставили отзыв к данному произведению')
+        return data
 
-    def get_average_score(self, obj):
+    """def get_score(self, obj):
         reviews = Review.objects.filter(obj.title)
-        return round(sum(reviews.score) / len(reviews.score))
+        return round(sum(reviews.score) / len(reviews.score))"""
 
 
 class CommentSerializer(serializers.ModelSerializer):

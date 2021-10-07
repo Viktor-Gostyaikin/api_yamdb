@@ -87,7 +87,6 @@ class Comment(models.Model):
         db_index=True
     )
     text = models.TextField()
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
