@@ -1,11 +1,14 @@
-from rest_framework import viewsets
-
-from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Title
 from users.models import User
-from .serializers import ReviewSerializer, CommentSerializer, UserSerializer
+from .serializers import ReviewSerializer, CommentSerializer, UserSerializer, UserRegistrationSerializer
 from .permissions import AuthorOrModeratorOrAdminOrReadOnly
 
 
@@ -62,3 +65,21 @@ class CommentViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+@api_view(['POST'])
+def create_auth_user(request):
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    #     send_mail(
+    #     'Регистрация на YaMDB',
+    #     (UserRegistrationSerializer.username, UserRegistrationSerializer.email,),
+    #     'my-email',
+    #     ['my-receive-email']
+    # )
+    # email.attach_file(ConsultSerializer.file)
+    # email.send()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer._errors, status=status.HTTP_400_BAD_REQUEST)
