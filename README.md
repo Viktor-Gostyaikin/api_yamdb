@@ -15,7 +15,7 @@ git clone https://github.com/Viktor-Gostyaikin/api_final_yatube.git
 ```
 
 ```
-cd api_final_yatube
+cd api_yamdb
 ```
 
 __Cоздать и активировать виртуальное окружение:__
