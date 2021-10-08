@@ -6,3 +6,9 @@ class AuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
                 or obj.author == request.user
                 or request.user.role == 'MODERATOR'
                 or request.user.role == 'ADMIN')
+
+
+class ReadOrAdminOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_superuser)

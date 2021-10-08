@@ -34,10 +34,9 @@ class Title(models.Model):
     year = models.IntegerField(
         verbose_name='Год издания', db_index=True, default='2021',
         validators=[validator_year])
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL,
-        blank=True, null=True, related_name='titles')
-    genre = models.ManyToManyField(Genre, related_name='titles')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
+                                 blank=True, null=True, related_name="titles")
+    genre = models.ManyToManyField(Genre, related_name="titles")
     description = models.CharField(max_length=256, null=True)
 
     class Meta:
@@ -46,14 +45,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Genre_Title(models.Model):
-    title = models.ForeignKey(
-        Title, on_delete=models.CASCADE,
-        related_name="titles")
-    genre = models.ForeignKey(
-        Genre, related_name="ganre", on_delete=models.CASCADE)
 
 
 class Review(models.Model):
