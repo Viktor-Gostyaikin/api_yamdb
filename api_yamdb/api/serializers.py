@@ -6,6 +6,7 @@ from reviews.models import Review, Comment
 from users.models import User
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
+ERROR_SCORE = 'Оценка произведения должна быть в значении от 1 до 10'
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -18,6 +19,11 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate_score(self, value):
+        if not (1 < value < 10):
+            raise serializers.ValidationError(ERROR_SCORE)
+        return value
 
     def validate(self, data):
         if self.context['request'].method != 'POST':
