@@ -1,9 +1,11 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.relations import SlugRelatedField
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, PasswordField
+from django.conf import settings
 from reviews.models import Review, Comment
 from users.models import User
+from django.contrib.auth import authenticate
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -78,6 +80,42 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 fields=['username', 'email']
             )
         ]
-    def create(self, validated_data):
-        user = User.objects.create(**validated_data)
-        return user
+    def validate_username(self, value):
+        """
+        Check that the username not a 'me'.
+        """
+        if 'me' == value.lower():
+            raise serializers.ValidationError('Invalid value of username')
+        return value
+
+class YaTokenSerializer(TokenObtainPairSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields[self.username_field] = serializers.CharField()
+        self.fields['confirmation_code'] = PasswordField()
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['access'] = user.name
+        return token
+
+    def validate(self, attrs):
+        authenticate_kwargs = {
+            self.username_field: attrs[self.username_field],
+            'confirmation_code': attrs['confirmation_code'],
+        }
+        try:
+            authenticate_kwargs['request'] = self.context['request']
+        except KeyError:
+            pass
+
+        self.user = authenticate(**authenticate_kwargs)
+
+        if not settings.api_settings.USER_AUTHENTICATION_RULE(self.user):
+            raise exceptions.AuthenticationFailed(
+                self.error_messages['no_active_account'],
+                'no_active_account',
+            )
+
+        return {}
