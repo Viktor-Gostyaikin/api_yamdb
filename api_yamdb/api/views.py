@@ -5,14 +5,13 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.conf import settings
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Title
 from users.models import User
 from .serializers import (
     ReviewSerializer, CommentSerializer, UserSerializer,
-    UserRegistrationSerializer, YaTokenSerializer,
+    UserRegistrationSerializer, GetTokenSerializer,
 )
 from .permissions import AuthorOrModeratorOrAdminOrReadOnly
 
@@ -72,8 +71,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-class GetTokennView(TokenObtainPairView):
-    serializer_class = YaTokenSerializer
+class GetTokenView(TokenObtainPairView):
+    serializer_class = GetTokenSerializer
 
 
 @api_view(['POST'])

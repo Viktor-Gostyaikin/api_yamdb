@@ -88,10 +88,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Invalid value of username')
         return value
 
-class YaTokenSerializer(TokenObtainPairSerializer):
+class GetTokenSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
         self.fields[self.username_field] = serializers.CharField()
         self.fields['confirmation_code'] = PasswordField()
     @classmethod
@@ -117,5 +115,5 @@ class YaTokenSerializer(TokenObtainPairSerializer):
                 self.error_messages['no_active_account'],
                 'no_active_account',
             )
-
-        return {}
+        if self.user.is_authenticated:
+            return self.user.token
