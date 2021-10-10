@@ -48,7 +48,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(read_only=True)
     class Meta:
         model = User
         fields = (
@@ -57,7 +56,8 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'bio',
-            'role'
+            'role',
+
         )
         validators = [
             UniqueTogetherValidator(
@@ -65,6 +65,35 @@ class UserSerializer(serializers.ModelSerializer):
                 fields=['username', 'email']
             )
         ]
+        def validate_role(self, value):
+            if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
+                raise serializers.ValidationError('Invalid value of role')
+            return value
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+
+        )
+        read_only_fields = ['role']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=['username', 'email']
+            )
+        ]
+        def validate_role(self, value):
+            if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
+                raise serializers.ValidationError('Invalid value of role')
+            return value
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

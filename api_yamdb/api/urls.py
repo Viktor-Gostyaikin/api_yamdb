@@ -20,13 +20,15 @@ router_v1.register(
     CommentViewSet,
     basename='comments'
 )
-router_v1.register(r'users', UserViewSet)
+router_v1.register(r'users', UserViewSet, basename='users')
 
 
 v1_patterns = [
     path('', include(router_v1.urls)),
-    path('auth/signup/', create_auth_user, name='signup'),
-    path('auth/token/', GetTokenView.as_view(), name='token_obtain_pair'),
+    # path('auth/signup/', create_auth_user, name='signup'),
+    # path('auth/token/', GetTokenView.as_view(), name='token_obtain_pair'),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
 ]
 urlpatterns = [
     path('v1/', include(v1_patterns)),
