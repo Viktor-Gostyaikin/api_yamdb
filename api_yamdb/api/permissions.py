@@ -10,6 +10,7 @@ class AuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
                 or request.user.role == 'MODERATOR'
                 or request.user.role == 'ADMIN')
 
+
 class ReadOrAdminOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         def check_role(request, *args):

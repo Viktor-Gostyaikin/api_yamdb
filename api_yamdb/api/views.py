@@ -1,21 +1,24 @@
-from rest_framework import permissions, viewsets, status, mixins
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
+from rest_framework import permissions, viewsets, status, mixins
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from reviews.models import Title
+from reviews.models import Title, Category, Genre
 from .serializers import (
     ReviewSerializer, CommentSerializer, UserSerializer,
     UserMeSerializer, UserRegistrationSerializer,
-    GetTokenSerializer,
+    GetTokenSerializer, CategorySerializer, GenreSerializer,
+    TitleSerializer, TitleCreateSerializer,
 )
-from .permissions import AuthorOrModeratorOrAdminOrReadOnly, AdminOnly
+from .permissions import AdminOnly, AuthorOrModeratorOrAdminOrReadOnly, ReadOrAdminOnly
 
 User = get_user_model()
 
@@ -131,3 +134,44 @@ def create_auth_user(request):
         return Response('Отправлено письмо с confirmation_code на ваш email', status=status.HTTP_201_CREATED)
     else:
         return Response(serializer._errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoryViewSet(
+    ListModelMixin, CreateModelMixin,
+    DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = Category.objects.all().order_by('id')
+    serializer_class = CategorySerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ['name']
+    pagination_class = LimitOffsetPagination
+    lookup_field = 'slug'
+    permission_classes = (ReadOrAdminOnly,)
+
+
+class GenreViewSet(
+    ListModelMixin, CreateModelMixin,
+    DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ['name']
+    pagination_class = LimitOffsetPagination
+    lookup_field = 'slug'
+    permission_classes = (ReadOrAdminOnly,)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.annotate(
+        rating=Avg('title_reviews__score'))
+    filter_backends = (SearchFilter,)
+    search_fields = ['category', 'genre', 'name', 'year']
+    pagination_class = PageNumberPagination
+    permission_classes = (ReadOrAdminOnly,)
+
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleCreateSerializer
+        return TitleSerializer

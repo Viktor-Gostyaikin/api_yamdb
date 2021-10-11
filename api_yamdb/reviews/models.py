@@ -1,6 +1,7 @@
 from django.db import models
 
 from users.models import User
+from .validators import validator_year
 
 
 class Category(models.Model):

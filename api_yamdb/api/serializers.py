@@ -3,7 +3,8 @@ from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.relations import SlugRelatedField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, PasswordField
 from django.conf import settings
-from reviews.models import Review, Comment
+from reviews.models import Review, Comment, Category, Genre, Title
+
 from users.models import User
 from django.contrib.auth import authenticate
 
@@ -90,6 +91,7 @@ class UserMeSerializer(serializers.ModelSerializer):
                 fields=['username', 'email']
             )
         ]
+
         def validate_role(self, value):
             if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
                 raise serializers.ValidationError('Invalid value of role')
@@ -116,6 +118,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if 'me' == value.lower():
             raise serializers.ValidationError('Invalid value of username')
         return value
+
 
 class GetTokenSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
@@ -146,3 +149,41 @@ class GetTokenSerializer(TokenObtainPairSerializer):
             )
         if self.user.is_authenticated:
             return self.user.token
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+        lookup_field = 'slug'
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+        lookup_field = 'slug'
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.FloatField()
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Title
