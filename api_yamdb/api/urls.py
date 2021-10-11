@@ -31,6 +31,10 @@ v1_patterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
 ]
+
 urlpatterns = [
     path('v1/', include(v1_patterns)),
+    path('v1/', include('djoser.urls')),
+    path('v1/', include('djoser.urls.jwt')),
+
 ]
