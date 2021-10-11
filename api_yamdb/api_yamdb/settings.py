@@ -1,5 +1,5 @@
 import os
-
+from datetime import timedelta
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,8 +24,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'reviews',
-    'djoser',
     'api',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+
 ]
 
 MIDDLEWARE = [
@@ -109,19 +111,21 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 AUTH_USER_MODEL = 'users.User'
 
-from datetime import timedelta
-
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ]
 }
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
-    'AUTH_HEADER_TYPER': ('Bearer'),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60 * 2),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+
 }
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "y.mdb@yandex.ru"
+EMAIL_HOST_PASSWORD = "rpj-ewj-57b-egs"
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
