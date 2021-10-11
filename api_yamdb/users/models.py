@@ -11,7 +11,7 @@ class User(AbstractUser):
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
-    ROLE = (
+    ROLE_CHOICES = (
         (USER, 'Пользователь'),
         (MODERATOR, 'Модератор'),
         (ADMIN, 'Администратор'),
@@ -33,7 +33,7 @@ class User(AbstractUser):
         blank=True,
     )
     role = models.CharField(
-        'Роль', max_length=9, choices=ROLE, default=USER
+        'Роль', choices=ROLE_CHOICES, max_length=9, default=USER
     )
     confirmation_code = models.CharField(
         'confirmation_code', blank=True, max_length=128)
