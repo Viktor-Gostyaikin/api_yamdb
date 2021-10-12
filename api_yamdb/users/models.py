@@ -47,8 +47,6 @@ class User(AbstractUser):
                 fields=['username', 'email'],
                 name='unique_user')
         ]
-<<<<<<< HEAD
-=======
 
     def get_full_name(self):
         """
@@ -72,4 +70,3 @@ class User(AbstractUser):
         "O" or letters and digits that look similar -- just to avoid confusion.
         """
         return get_random_string(length, allowed_chars)
->>>>>>> 93edfffad814a9c13a542a52c7e20e58dcf9dcd5

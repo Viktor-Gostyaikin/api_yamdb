@@ -1,3 +1,4 @@
+from django.db.models import fields
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueTogetherValidator, ValidationError
 
@@ -167,12 +168,14 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(read_only=True, many=True)
+    genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.FloatField()
+    rating = serializers.FloatField(read_only=True)
+
     class Meta:
         fields = '__all__'
         model = Title
+
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -185,7 +188,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
-
     class Meta:
         fields = '__all__'
         model = Title
