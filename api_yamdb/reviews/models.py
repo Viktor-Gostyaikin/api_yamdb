@@ -31,12 +31,14 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=100, verbose_name='Произведение')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
-                                 blank=True, null=True, related_name="titles")
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL,
+        blank=True, null=True, related_name="titles"
+    )
     genre = models.ManyToManyField(Genre, related_name="titles")
     year = models.IntegerField(
         verbose_name="Год издания", db_index=True,
-        validators=[validator_year]
+        validators=[validator_year],
     )
 
     description = models.CharField(max_length=300, null=True)

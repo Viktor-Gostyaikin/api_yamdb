@@ -117,7 +117,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', 
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -126,7 +126,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60*2),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60 * 2),
     'AUTH_HEADER_TYPES': ('Bearer',),
 
 }

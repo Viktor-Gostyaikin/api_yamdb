@@ -189,11 +189,9 @@ class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     rating = serializers.FloatField(read_only=True)
 
-
     class Meta:
         fields = '__all__'
         model = Title
-
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -206,6 +204,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
+
     class Meta:
         fields = '__all__'
         model = Title

@@ -25,7 +25,6 @@ class ReadOrAdminOnly(permissions.BasePermission):
                 or check_role(request, User.ADMIN))
 
 
-
 class AdminOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         def check_role(request, *args):

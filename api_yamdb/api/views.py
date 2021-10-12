@@ -3,13 +3,13 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from django.db.models import Avg
-from rest_framework import permissions, viewsets, status, mixins
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.pagination import (
     LimitOffsetPagination, PageNumberPagination
 )
-from rest_framework.mixins import(
+from rest_framework.mixins import (
     ListModelMixin, CreateModelMixin, DestroyModelMixin
 )
 from rest_framework.filters import SearchFilter
@@ -177,7 +177,6 @@ class CategoryViewSet(
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminOnly,)
 
-    
 
 class GenreViewSet(
     ListModelMixin, CreateModelMixin,

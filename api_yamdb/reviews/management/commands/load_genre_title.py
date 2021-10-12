@@ -15,6 +15,9 @@ class Command(BaseCommand):
         response = requests.get(link)
         reader = csv.DictReader(response.text.splitlines())
 
-        Genre_Title.objects.bulk_create([Genre_Title(**{k.lower(): v for k, v in data.items()}) for data in reader])
+        Genre_Title.objects.bulk_create(
+            [Genre_Title(
+                **{k.lower(): v for k, v in data.items()}
+            ) for data in reader])
 
         self.stdout.write(self.style.SUCCESS('Successfully loaded'))

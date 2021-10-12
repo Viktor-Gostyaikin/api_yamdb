@@ -37,7 +37,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
     objects = UserManager()
 
-
     def set_confirmation_code(self, confirmation_code):
         self.confirmation_code = make_password(confirmation_code)
 
@@ -52,8 +51,6 @@ class User(AbstractUser):
         "O" or letters and digits that look similar -- just to avoid confusion.
         """
         return get_random_string(length, allowed_chars)
-    
+
     def check_confirmation_code(self, raw_confirmation_code: str) -> bool:
         return check_password(raw_confirmation_code, self.confirmation_code)
-    
-
