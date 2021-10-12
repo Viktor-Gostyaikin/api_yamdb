@@ -22,12 +22,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'users',
     'reviews',
     'api',
-    'djoser',
     'django_filters',
-    'rest_framework_simplejwt',
 
 ]
 
