@@ -15,6 +15,8 @@ from rest_framework.mixins import(
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenViewBase
+from django_filters.rest_framework import DjangoFilterBackend
+from .filter import TitleFilter
 
 from reviews.models import Title, Category, Genre, Review
 from .serializers import (
@@ -171,29 +173,31 @@ class CategoryViewSet(
     serializer_class = CategorySerializer
     filter_backends = (SearchFilter,)
     search_fields = ['name']
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminOnly,)
 
+    
 
 class GenreViewSet(
     ListModelMixin, CreateModelMixin,
     DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
     filter_backends = (SearchFilter,)
     search_fields = ['name']
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
-        rating=Avg('title_reviews__score'))
-    filter_backends = (SearchFilter,)
+        rating=Avg('title_reviews__score')).order_by('id')
+    filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ['category', 'genre', 'name', 'year']
+    filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     permission_classes = (ReadOrAdminOnly,)
 

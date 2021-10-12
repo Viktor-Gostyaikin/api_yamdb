@@ -22,7 +22,8 @@ class ReadOrAdminOnly(permissions.BasePermission):
                     return True
             return False
         return (request.method in permissions.SAFE_METHODS
-                or check_role(request, [User.MODERATOR, User.ADMIN]))
+                or check_role(request, User.ADMIN))
+
 
 
 class AdminOnly(permissions.BasePermission):

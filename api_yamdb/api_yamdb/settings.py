@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'reviews',
     'api',
     'djoser',
-    # 'rest_framework.authtoken',
+    'django_filters',
     'rest_framework_simplejwt',
 
 ]
@@ -113,6 +113,9 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 
     ],
