@@ -4,13 +4,17 @@ from django.shortcuts import get_object_or_404
 
 from django.db.models import Avg
 from rest_framework import permissions, viewsets, status, mixins
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin
+from rest_framework.pagination import (
+    LimitOffsetPagination, PageNumberPagination
+)
+from rest_framework.mixins import(
+    ListModelMixin, CreateModelMixin, DestroyModelMixin
+)
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenViewBase
 
 from reviews.models import Title, Category, Genre, Review
 from .serializers import (
@@ -19,9 +23,12 @@ from .serializers import (
     GetTokenSerializer, CategorySerializer, GenreSerializer,
     TitleSerializer, TitleCreateSerializer,
 )
-from .permissions import AdminOnly, AuthorOrModeratorOrAdminOrReadOnly, ReadOrAdminOnly
+from .permissions import (
+    AdminOnly, AuthorOrModeratorOrAdminOrReadOnly, ReadOrAdminOnly
+)
 
 User = get_user_model()
+
 
 class ReviewViewSet(viewsets.ModelViewSet, CreateModelMixin):
 
@@ -71,6 +78,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    '''
+    Предоставляет возможность работать объектами пользователей:
+    читать, создавать, редактировать, удалять.
+    Базовый доступ - только для админитратора.
+    Действие 'me/' доступно для всех авторизованых пользователей,
+    где доступно получить или изменить свои данные.
+    '''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOnly(),)
@@ -84,10 +98,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'me':
             self.queryset = self.queryset.filter(pk=user.pk)
         return self.queryset
-    
+
     def get_permissions(self):
         if self.action == 'me':
-            return  (permissions.IsAuthenticated()),
+            return (permissions.IsAuthenticated()),
         return self.permission_classes
 
     def get_serializer_class(self):
@@ -111,27 +125,42 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GetTokenView(TokenObtainPairView):
+class Custom_TokenObtainPairView(TokenViewBase):
+    '''Получение JWT-токена в обмен на username и confirmation code.'''
     serializer_class = GetTokenSerializer
 
 
+custom_token_obtain_pair = Custom_TokenObtainPairView.as_view()
+
+
 @api_view(['POST'])
-def create_auth_user(request):
+@permission_classes([permissions.AllowAny])
+def get_confirmation_code(request):
+    '''
+    Получить код подтверждения на переданный email.
+    Права доступа: Доступно без токена.
+    Использовать имя 'me' в качестве username запрещено.
+    Поля email и username должны быть уникальными.
+    '''
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        new_user = User.objects.get(username=request.data['username'])
-        confirmation_code = new_user.make_confirmation_code()
-        new_user.set_confirmation_code(confirmation_code=confirmation_code)
-        new_user.save()
-        new_user.email_user(
-            subject='Подтверждение регистрации',
+        _user = User.objects.create(
+            username=serializer.data['username'],
+            email=serializer.data['email'],
+        )
+        confirmation_code = _user.make_confirmation_code()
+        _user.set_confirmation_code(confirmation_code=confirmation_code)
+        _user.save()
+        _user.email_user(
+            subject='Создан confirmation code для получения token',
             message=f'Ваш confirmation code {confirmation_code}',
             from_email=settings.EMAIL_HOST_USER,
         )
-        return Response('Отправлено письмо с confirmation_code на ваш email', status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
-        return Response(serializer._errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer._errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class CategoryViewSet(
@@ -167,7 +196,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     search_fields = ['category', 'genre', 'name', 'year']
     pagination_class = PageNumberPagination
     permission_classes = (ReadOrAdminOnly,)
-
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):

@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'users',
     'reviews',
     'api',
-    'rest_framework',
     'djoser',
     # 'rest_framework.authtoken',
     'rest_framework_simplejwt',

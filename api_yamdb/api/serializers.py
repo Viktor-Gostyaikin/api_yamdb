@@ -1,16 +1,17 @@
+from django.contrib.auth import get_user_model
+
 from rest_framework import serializers, exceptions
 from rest_framework.validators import UniqueTogetherValidator, ValidationError
-
 from rest_framework.relations import SlugRelatedField
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, PasswordField
-from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Review, Comment, Category, Genre, Title
 
-from users.models import User
-from django.contrib.auth import authenticate
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
 ERROR_SCORE = 'Оценка произведения должна быть в значении от 1 до 10'
+
+User = get_user_model()
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -68,6 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
                 fields=['username', 'email']
             )
         ]
+
         def validate_role(self, value):
             if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
                 raise serializers.ValidationError('Invalid value of role')
@@ -107,12 +109,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'username',
             'email',
         )
-        validators = [
-            UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=['username', 'email']
-            )
-        ]
+    validators = [
+        UniqueTogetherValidator(
+            queryset=User.objects.all(),
+            fields=['username', 'email']
+        )
+    ]
+
     def validate_username(self, value):
         """
         Check that the username not a 'me'.
@@ -121,36 +124,51 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Invalid value of username')
         return value
 
+    def validate_email(self, value):
+        try:
+            if User.objects.get(email=value):
+                raise serializers.ValidationError('Email is occupied')
+        except User.DoesNotExist:
+            return value
 
-class GetTokenSerializer(TokenObtainPairSerializer):
+
+class ConfirmationCodeField(serializers.CharField):
     def __init__(self, *args, **kwargs):
-        self.fields[self.username_field] = serializers.CharField()
-        self.fields['confirmation_code'] = PasswordField()
+        kwargs.setdefault('style', {})
+
+        kwargs['style']['input_type'] = 'confirmation_code'
+        kwargs['write_only'] = True
+
+        super().__init__(*args, **kwargs)
+
+
+class GetTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150,)
+    confirmation_code = ConfirmationCodeField()
+
     @classmethod
     def get_token(cls, user):
-        token = super().get_token(user)
-        token['access'] = user.name
-        return token
+        return RefreshToken.for_user(user)
+
+    def validate_username(self, value):
+        try:
+            if User.objects.get(username=value):
+                return value
+        except User.DoesNotExist:
+            raise exceptions.NotFound()
 
     def validate(self, attrs):
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            'confirmation_code': attrs['confirmation_code'],
-        }
         try:
-            authenticate_kwargs['request'] = self.context['request']
+            attrs['request'] = self.context['request']
         except KeyError:
             pass
 
-        self.user = authenticate(**authenticate_kwargs)
+        self.user = User.objects.get(username=attrs['username'])
+        if self.user.check_confirmation_code(attrs['confirmation_code']):
+            refresh = self.get_token(self.user)
+            return {'access': str(refresh.access_token)}
+        raise serializers.ValidationError('The data is not valid')
 
-        if not settings.api_settings.USER_AUTHENTICATION_RULE(self.user):
-            raise exceptions.AuthenticationFailed(
-                self.error_messages['no_active_account'],
-                'no_active_account',
-            )
-        if self.user.is_authenticated:
-            return self.user.token
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -170,6 +188,7 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.FloatField()
+
     class Meta:
         fields = '__all__'
         model = Title
