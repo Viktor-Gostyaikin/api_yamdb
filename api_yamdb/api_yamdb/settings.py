@@ -21,8 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
-=======
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
@@ -30,7 +28,6 @@ INSTALLED_APPS = [
     'api',
     'django_filters',
 
->>>>>>> develop
 ]
 
 MIDDLEWARE = [
@@ -111,8 +108,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
-<<<<<<< HEAD
-=======
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -142,4 +137,3 @@ SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
->>>>>>> develop
