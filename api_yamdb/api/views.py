@@ -1,10 +1,8 @@
-from django.conf import settings
-from django.http import request
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.db.models import Avg
-from django_filters.rest_framework import DjangoFilterBackend
+from django.conf import settings
+from django.shortcuts import get_object_or_404
 
+from django.db.models import Avg
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -14,24 +12,21 @@ from rest_framework.pagination import (
 from rest_framework.mixins import (
     ListModelMixin, CreateModelMixin, DestroyModelMixin
 )
-
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenViewBase
-
-from reviews.models import Title, Review, Category, Genre
-from users.models import User
-
+from django_filters.rest_framework import DjangoFilterBackend
 from .filter import TitleFilter
+
+from reviews.models import Title, Category, Genre, Review
 from .serializers import (
     ReviewSerializer, CommentSerializer, UserSerializer,
     UserMeSerializer, UserRegistrationSerializer,
     GetTokenSerializer, CategorySerializer, GenreSerializer,
     TitleSerializer, TitleCreateSerializer,
 )
-
 from .permissions import (
-    AdminOnly, ReadOrAdminOnly, AuthorOrAdminOrModeratorOnly
+    AdminOnly, AuthorOrAdminOrModeratorOnly, ReadOrAdminOnly
 )
 
 User = get_user_model()
@@ -171,6 +166,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     читать, создавать, редактировать, удалять.
     Координирует разрешения на доступ.
     '''
+
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (AuthorOrAdminOrModeratorOnly,

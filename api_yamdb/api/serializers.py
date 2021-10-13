@@ -15,8 +15,6 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(read_only=True)
-
     class Meta:
         model = User
         fields = (
@@ -26,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'bio',
             'role',
+
         )
         validators = [
             UniqueTogetherValidator(
@@ -67,14 +66,12 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = (
             'username',
             'email',
         )
-
     validators = [
         UniqueTogetherValidator(
             queryset=User.objects.all(),
@@ -83,11 +80,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     ]
 
     def validate_username(self, value):
-
         """
         Check that the username not a 'me'.
         """
-
         if 'me' == value.lower():
             raise serializers.ValidationError('Invalid value of username')
         return value
@@ -191,7 +186,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'author', 'pub_date')
 
     def validate_score(self, value):
-        if not (1 < value < 10):
+        if not (1 <= value <= 10):
             raise serializers.ValidationError(ERROR_SCORE)
         return value
 
@@ -215,4 +210,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        #read_only_fields = ('id', 'author', 'pub_date')
+        read_only_fields = ('id', 'author', 'pub_date')
