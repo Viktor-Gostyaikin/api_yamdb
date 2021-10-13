@@ -23,9 +23,9 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'bio',
-            'role',
-
+            'role'
         )
+
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
@@ -48,9 +48,9 @@ class UserMeSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'bio',
-            'role',
-
+            'role'
         )
+
         read_only_fields = ['role']
         validators = [
             UniqueTogetherValidator(
@@ -80,9 +80,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     ]
 
     def validate_username(self, value):
-        """
+
+        '''
         Check that the username not a 'me'.
-        """
+        '''
+
         if 'me' == value.lower():
             raise serializers.ValidationError('Invalid value of username')
         return value

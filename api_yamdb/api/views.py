@@ -33,6 +33,7 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
+
     '''
     Предоставляет возможность работать объектами пользователей:
     читать, создавать, редактировать, удалять.
@@ -40,6 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Действие 'me/' доступно для всех авторизованых пользователей,
     где доступно получить или изменить свои данные.
     '''
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOnly(),)
@@ -81,7 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class Custom_TokenObtainPairView(TokenViewBase):
-    '''Получение JWT-токена в обмен на username и confirmation code.'''
+    ''' Получение JWT-токена в обмен на username и confirmation code. '''
     serializer_class = GetTokenSerializer
 
 
@@ -91,12 +93,14 @@ custom_token_obtain_pair = Custom_TokenObtainPairView.as_view()
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def get_confirmation_code(request):
+
     '''
     Получить код подтверждения на переданный email.
     Права доступа: Доступно без токена.
     Использовать имя 'me' в качестве username запрещено.
     Поля email и username должны быть уникальными.
     '''
+
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         _user = User.objects.create(
