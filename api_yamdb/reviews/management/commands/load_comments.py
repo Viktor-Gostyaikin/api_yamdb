@@ -15,6 +15,10 @@ class Command(BaseCommand):
         response = requests.get(link)
         reader = csv.DictReader(response.text.splitlines())
 
-        Comment.objects.bulk_create([Comment(**{k.lower(): v for k, v in data.items()}) for data in reader])
+        Comment.objects.bulk_create(
+            [Comment(
+                **{k.lower(): v for k, v in data.items()}
+            ) for data in reader]
+        )
 
         self.stdout.write(self.style.SUCCESS('Successfully loaded'))

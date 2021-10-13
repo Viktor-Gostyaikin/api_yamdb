@@ -1,25 +1,28 @@
 from django.conf import settings
+from django.http import request
 from django.shortcuts import get_object_or_404
-
+from django.contrib.auth import get_user_model
 from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import permissions, viewsets, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
-
-from rest_framework.mixins import (ListModelMixin,
-                                   CreateModelMixin,
-                                   DestroyModelMixin)
+from rest_framework.pagination import (
+    LimitOffsetPagination, PageNumberPagination
+)
+from rest_framework.mixins import (
+    ListModelMixin, CreateModelMixin, DestroyModelMixin
+)
 
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenViewBase
 
 from reviews.models import Title, Review, Category, Genre
 from users.models import User
 
+from .filter import TitleFilter
 from .serializers import (
     ReviewSerializer, CommentSerializer, UserSerializer,
     UserMeSerializer, UserRegistrationSerializer,
@@ -27,12 +30,21 @@ from .serializers import (
     TitleSerializer, TitleCreateSerializer,
 )
 
-from .permissions import (AdminOnly,
-                          AuthorOrModeratorOrAdminOrReadOnly,
-                          ReadOrAdminOnly)
+from .permissions import (
+    AdminOnly, ReadOrAdminOnly, AuthorOrAdminOrModeratorOnly
+)
+
+User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    '''
+    Предоставляет возможность работать объектами пользователей:
+    читать, создавать, редактировать, удалять.
+    Базовый доступ - только для админитратора.
+    Действие 'me/' доступно для всех авторизованых пользователей,
+    где доступно получить или изменить свои данные.
+    '''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOnly(),)
@@ -73,28 +85,42 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class GetTokenView(TokenObtainPairView):
+class Custom_TokenObtainPairView(TokenViewBase):
+    '''Получение JWT-токена в обмен на username и confirmation code.'''
     serializer_class = GetTokenSerializer
 
 
+custom_token_obtain_pair = Custom_TokenObtainPairView.as_view()
+
+
 @api_view(['POST'])
-def create_auth_user(request):
+@permission_classes([permissions.AllowAny])
+def get_confirmation_code(request):
+    '''
+    Получить код подтверждения на переданный email.
+    Права доступа: Доступно без токена.
+    Использовать имя 'me' в качестве username запрещено.
+    Поля email и username должны быть уникальными.
+    '''
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        new_user = User.objects.get(username=request.data['username'])
-        confirmation_code = new_user.make_confirmation_code()
-        new_user.set_confirmation_code(confirmation_code=confirmation_code)
-        new_user.save()
-        new_user.email_user(
-            subject='Подтверждение регистрации',
+        _user = User.objects.create(
+            username=serializer.data['username'],
+            email=serializer.data['email'],
+        )
+        confirmation_code = _user.make_confirmation_code()
+        _user.set_confirmation_code(confirmation_code=confirmation_code)
+        _user.save()
+        _user.email_user(
+            subject='Создан confirmation code для получения token',
             message=f'Ваш confirmation code {confirmation_code}',
             from_email=settings.EMAIL_HOST_USER,
         )
-        return Response('Отправлено письмо с confirmation_code на ваш email',
-                        status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
-        return Response(serializer._errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer._errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class CategoryViewSet(
@@ -105,7 +131,7 @@ class CategoryViewSet(
     serializer_class = CategorySerializer
     filter_backends = (SearchFilter,)
     search_fields = ['name']
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminOnly,)
 
@@ -114,20 +140,21 @@ class GenreViewSet(
     ListModelMixin, CreateModelMixin,
     DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
     filter_backends = (SearchFilter,)
     search_fields = ['name']
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     lookup_field = 'slug'
     permission_classes = (ReadOrAdminOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
-        rating=Avg('title_reviews__score'))
-    filter_backends = (SearchFilter,)
+        rating=Avg('title_reviews__score')).order_by('id')
+    filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ['category', 'genre', 'name', 'year']
+    filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     permission_classes = (ReadOrAdminOnly,)
 
@@ -144,10 +171,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     читать, создавать, редактировать, удалять.
     Координирует разрешения на доступ.
     '''
-
+    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOrModeratorOrAdminOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    permission_classes = (AuthorOrAdminOrModeratorOnly,
+                          permissions.IsAuthenticatedOrReadOnly)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -170,8 +197,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     '''
 
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOrModeratorOrAdminOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    permission_classes = (AuthorOrAdminOrModeratorOnly,
+                          permissions.IsAuthenticatedOrReadOnly)
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])

@@ -1,7 +1,4 @@
-import jwt
-from django.contrib.auth.hashers import make_password
-from django.conf import settings
-from datetime import datetime
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils.crypto import get_random_string
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
@@ -37,53 +34,8 @@ class User(AbstractUser):
     )
     confirmation_code = models.CharField(
         'confirmation_code', blank=True, max_length=128)
-    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
     objects = UserManager()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_user')
-        ]
-
-    @property
-    def token(self):
-
-        """
-        Позволяет получить токен пользователя путем вызова user.token, вместо
-        user._generate_jwt_token(). Декоратор @property выше делает это
-        возможным. token называется "динамическим свойством".
-        """
-
-        return self._generate_jwt_token()
-
-    def _generate_jwt_token(self):
-
-        """
-        Генерирует веб-токен JSON, в котором хранится идентификатор этого
-        пользователя, срок действия токена составляет 1 день от создания
-        """
-
-        dt = datetime.now() + datetime.timedelta(days=1)
-
-        token = jwt.encode({
-            'id': self.pk,
-            'exp': int(dt.strftime('%s'))
-        }, settings.SECRET_KEY, algorithm='HS256')
-
-        return token.decode('utf-8')
-
-    def get_full_name(self):
-
-        """
-        Этот метод требуется Django для таких вещей, как обработка электронной
-        почты. Обычно это имя фамилия пользователя, но поскольку мы не
-        используем их, будем возвращать username.
-        """
-
-        return self.username
 
     def set_confirmation_code(self, confirmation_code):
         self.confirmation_code = make_password(confirmation_code)
@@ -101,3 +53,6 @@ class User(AbstractUser):
         """
 
         return get_random_string(length, allowed_chars)
+
+    def check_confirmation_code(self, raw_confirmation_code: str) -> bool:
+        return check_password(raw_confirmation_code, self.confirmation_code)

@@ -15,5 +15,8 @@ class Command(BaseCommand):
         response = requests.get(link)
         reader = csv.DictReader(response.text.splitlines())
 
-        Review.objects.bulk_create([Review(**{k.lower(): v for k, v in data.items()}) for data in reader])
+        Review.objects.bulk_create(
+            [Review(
+                **{k.lower(): v for k, v in data.items()}
+            ) for data in reader])
         self.stdout.write(self.style.SUCCESS('Successfully loaded'))

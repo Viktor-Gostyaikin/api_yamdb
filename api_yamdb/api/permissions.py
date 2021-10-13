@@ -3,13 +3,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class AuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS
-                or obj.author == request.user
-                or request.user.role == 'MODERATOR'
-                or request.user.role == 'ADMIN')
-
 
 class ReadOrAdminOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -21,7 +14,8 @@ class ReadOrAdminOnly(permissions.BasePermission):
                     return True
             return False
         return (request.method in permissions.SAFE_METHODS
-                or check_role(request, [User.MODERATOR, User.ADMIN]))
+                or check_role(request, User.ADMIN))
+
 
 class AdminOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -33,3 +27,14 @@ class AdminOnly(permissions.BasePermission):
                     return True
             return False
         return (check_role(request, User.ADMIN))
+
+
+class AuthorOrAdminOrModeratorOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return (request.user.is_authenticated
+                and (request.user.role == User.ADMIN
+                     or request.user.role == User.MODERATOR
+                     or obj.author == request.user))
