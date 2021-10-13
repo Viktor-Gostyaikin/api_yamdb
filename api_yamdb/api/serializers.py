@@ -1,12 +1,9 @@
 from django.contrib.auth import get_user_model
-
-from rest_framework import serializers, exceptions
-from rest_framework.validators import UniqueTogetherValidator, ValidationError
+from rest_framework import exceptions, serializers
 from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from reviews.models import Review, Comment, Category, Genre, Title
-
+from reviews.models import Category, Comment, Genre, Review, Title
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
 ERROR_SCORE = 'Оценка произведения должна быть в значении от 1 до 10'

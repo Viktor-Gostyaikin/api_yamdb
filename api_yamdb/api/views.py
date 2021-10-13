@@ -1,33 +1,27 @@
-from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.shortcuts import get_object_or_404
-
+from django.contrib.auth import get_user_model
 from django.db.models import Avg
-from rest_framework import permissions, viewsets, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.pagination import (
-    LimitOffsetPagination, PageNumberPagination
-)
-from rest_framework.mixins import (
-    ListModelMixin, CreateModelMixin, DestroyModelMixin
-)
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
-from rest_framework_simplejwt.views import TokenViewBase
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from .filter import TitleFilter
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.filters import SearchFilter
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenViewBase
+from reviews.models import Category, Genre, Review, Title
 
-from reviews.models import Title, Category, Genre, Review
-from .serializers import (
-    ReviewSerializer, CommentSerializer, UserSerializer,
-    UserMeSerializer, UserRegistrationSerializer,
-    GetTokenSerializer, CategorySerializer, GenreSerializer,
-    TitleSerializer, TitleCreateSerializer,
-)
-from .permissions import (
-    AdminOnly, AuthorOrAdminOrModeratorOnly, ReadOrAdminOnly
-)
+from .filter import TitleFilter
+from .permissions import (AdminOnly, AuthorOrAdminOrModeratorOnly,
+                          ReadOrAdminOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetTokenSerializer,
+                          ReviewSerializer, TitleCreateSerializer,
+                          TitleSerializer, UserMeSerializer,
+                          UserRegistrationSerializer, UserSerializer)
 
 User = get_user_model()
 
