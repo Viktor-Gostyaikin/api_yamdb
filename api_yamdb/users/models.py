@@ -1,7 +1,7 @@
-from django.contrib.auth.hashers import make_password, check_password
-from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.utils.crypto import get_random_string
 
 
 class User(AbstractUser):
