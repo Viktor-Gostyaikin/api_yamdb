@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 from users.models import User
 
 from .validators import validator_year
@@ -55,20 +57,27 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='title_reviews',
+        related_name='reviews',
     )
-    text = models.TextField()
+    text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_reviews',
+        related_name='reviews',
     )
-    score = models.SmallIntegerField()
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    score = models.SmallIntegerField(
+        verbose_name='Оценка',
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True
+    )
 
     class Meta:
         ordering = ('-pub_date',)
-
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(fields=['title', 'author'],
                                     name='unique_review')
@@ -82,19 +91,21 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='review_comments')
-    text = models.TextField()
+        related_name='comments')
+    text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_comments',
+        related_name='comments',
     )
     pub_date = models.DateTimeField(
-        'Дата добавления',
+        verbose_name='Дата добавления',
         auto_now_add=True)
 
     class Meta:
         ordering = ('-pub_date',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return self.text

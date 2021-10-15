@@ -45,7 +45,6 @@ class User(AbstractUser):
         allowed_chars='abcdefghjkmnpqrstuvwxyz'
             'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
     ):
-
         '''
         Generate a random password with the given length and given
         allowed_chars. The default value of allowed_chars does not have 'I' or
@@ -56,3 +55,21 @@ class User(AbstractUser):
 
     def check_confirmation_code(self, raw_confirmation_code: str) -> bool:
         return check_password(raw_confirmation_code, self.confirmation_code)
+
+    @property
+    def is_user(self):
+        if self.role == self.USER:
+            return True
+        return False
+
+    @property
+    def is_moderator(self):
+        if self.role == self.MODERATOR:
+            return True
+        return False
+
+    @property
+    def is_admin(self):
+        if self.role == self.ADMIN:
+            return True
+        return False
