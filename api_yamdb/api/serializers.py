@@ -58,12 +58,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'username',
             'email',
         )
-    validators = [
-        UniqueTogetherValidator(
-            queryset=User.objects.all(),
-            fields=['username', 'email']
-        )
-    ]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=['username', 'email']
+            )
+        ]
 
     def validate_username(self, value):
 
