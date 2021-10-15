@@ -122,10 +122,12 @@ def get_confirmation_code(request):
         )
 
 
-class CategoryViewSet(
-    ListModelMixin, CreateModelMixin,
-    DestroyModelMixin, viewsets.GenericViewSet
-):
+class ListOrCreateOrDestroy(ListModelMixin, CreateModelMixin,
+                            DestroyModelMixin, viewsets.GenericViewSet):
+    pass
+
+
+class CategoryViewSet(ListOrCreateOrDestroy):
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
     filter_backends = (SearchFilter,)
@@ -135,10 +137,7 @@ class CategoryViewSet(
     permission_classes = (ReadOrAdminOnly,)
 
 
-class GenreViewSet(
-    ListModelMixin, CreateModelMixin,
-    DestroyModelMixin, viewsets.GenericViewSet
-):
+class GenreViewSet(ListOrCreateOrDestroy):
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
     filter_backends = (SearchFilter,)
