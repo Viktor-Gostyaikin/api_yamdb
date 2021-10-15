@@ -30,8 +30,8 @@ class User(AbstractUser):
         blank=True,
     )
     role = models.CharField(
-        'Роль', choices=ROLE_CHOICES, 
-        max_length=9, default=USER, 
+        'Роль', choices=ROLE_CHOICES,
+        max_length=9, default=USER,
         error_messages={'validators': 'Выбрана несуществующая роль'}
     )
     confirmation_code = models.CharField(
