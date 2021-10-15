@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 
 from rest_framework import exceptions, serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .fields import ConfirmationCodeField
 from reviews.models import Category, Comment, Genre, Review, Title
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
@@ -51,12 +53,6 @@ class UserMeSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = ['role']
-        validators = [
-            UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=['username', 'email']
-            )
-        ]
 
         def validate_role(self, value):
             if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
@@ -96,16 +92,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             return value
 
 
-class ConfirmationCodeField(serializers.CharField):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('style', {})
-
-        kwargs['style']['input_type'] = 'confirmation_code'
-        kwargs['write_only'] = True
-
-        super().__init__(*args, **kwargs)
-
-
 class GetTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150,)
     confirmation_code = ConfirmationCodeField()
@@ -122,12 +108,7 @@ class GetTokenSerializer(serializers.Serializer):
             raise exceptions.NotFound()
 
     def validate(self, attrs):
-        try:
-            attrs['request'] = self.context['request']
-        except KeyError:
-            pass
-
-        self.user = User.objects.get(username=attrs['username'])
+        self.user = get_object_or_404(User, username=attrs['username'])
         if self.user.check_confirmation_code(attrs['confirmation_code']):
             refresh = self.get_token(self.user)
             return {'access': str(refresh.access_token)}

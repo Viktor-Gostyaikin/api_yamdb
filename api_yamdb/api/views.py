@@ -40,22 +40,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AdminOnly(),)
+    permission_classes = (AdminOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (SearchFilter,)
     search_fields = ['username']
     lookup_field = 'username'
-
-    def get_queryset(self):
-        user = self.request.user
-        if self.action == 'me':
-            self.queryset = self.queryset.filter(pk=user.pk)
-        return self.queryset
-
-    def get_permissions(self):
-        if self.action == 'me':
-            return (permissions.IsAuthenticated()),
-        return self.permission_classes
 
     def get_serializer_class(self):
         if self.action == 'me':
@@ -65,7 +54,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_instance(self):
         return self.request.user
 
-    @action(['get', 'put', 'patch', 'delete'], detail=False)
+    @action(
+        methods=['get', 'put', 'patch', 'delete'],
+        permission_classes=[permissions.IsAuthenticated],
+        detail=False
+    )
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         if request.method == 'GET':
@@ -89,19 +82,17 @@ custom_token_obtain_pair = Custom_TokenObtainPairView.as_view()
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def get_confirmation_code(request):
-
     '''
     Получить код подтверждения на переданный email.
     Права доступа: Доступно без токена.
     Использовать имя 'me' в качестве username запрещено.
     Поля email и username должны быть уникальными.
     '''
-
     serializer = UserRegistrationSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         _user = User.objects.create(
-            username=serializer.data['username'],
-            email=serializer.data['email'],
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data['email'],
         )
         confirmation_code = _user.make_confirmation_code()
         _user.set_confirmation_code(confirmation_code=confirmation_code)
@@ -111,11 +102,7 @@ def get_confirmation_code(request):
             message=f'Ваш confirmation code {confirmation_code}',
             from_email=settings.EMAIL_HOST_USER,
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    else:
-        return Response(
-            serializer._errors, status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class ListOrCreateOrDestroy(ListModelMixin, CreateModelMixin,
