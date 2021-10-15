@@ -6,8 +6,9 @@ from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .fields import ConfirmationCodeField
 from reviews.models import Category, Comment, Genre, Review, Title
+
+from .fields import ConfirmationCodeField
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
 ERROR_SCORE = 'Оценка произведения должна быть в значении от 1 до 10'
@@ -34,11 +35,6 @@ class UserSerializer(serializers.ModelSerializer):
             )
         ]
 
-        def validate_role(self, value):
-            if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
-                raise serializers.ValidationError('Invalid value of role')
-            return value
-
 
 class UserMeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,11 +49,6 @@ class UserMeSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = ['role']
-
-        def validate_role(self, value):
-            if value.lower() in [User.MODERATOR, User.USER, User.ADMIN]:
-                raise serializers.ValidationError('Invalid value of role')
-            return value
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

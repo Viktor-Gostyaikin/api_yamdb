@@ -2,20 +2,22 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 from rest_framework.response import Response
+
 from rest_framework_simplejwt.views import TokenViewBase
 
 from reviews.models import Category, Genre, Review, Title
 
 from .filter import TitleFilter
+from .mixins import ListOrCreateOrDestroy
 from .permissions import (AdminOnly, AuthorOrAdminOrModeratorOnly,
                           ReadOrAdminOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -88,25 +90,20 @@ def get_confirmation_code(request):
     Поля email и username должны быть уникальными.
     '''
     serializer = UserRegistrationSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        _user = User.objects.create(
-            username=serializer.validated_data['username'],
-            email=serializer.validated_data['email'],
-        )
-        confirmation_code = _user.make_confirmation_code()
-        _user.set_confirmation_code(confirmation_code=confirmation_code)
-        _user.save()
-        _user.email_user(
-            subject='Создан confirmation code для получения token',
-            message=f'Ваш confirmation code {confirmation_code}',
-            from_email=settings.EMAIL_HOST_USER,
-        )
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
-
-
-class ListOrCreateOrDestroy(ListModelMixin, CreateModelMixin,
-                            DestroyModelMixin, viewsets.GenericViewSet):
-    pass
+    serializer.is_valid(raise_exception=True)
+    _user = User.objects.create(
+        username=serializer.validated_data['username'],
+        email=serializer.validated_data['email'],
+    )
+    confirmation_code = _user.make_confirmation_code()
+    _user.set_confirmation_code(confirmation_code=confirmation_code)
+    _user.save()
+    _user.email_user(
+        subject='Создан confirmation code для получения token',
+        message=f'Ваш confirmation code {confirmation_code}',
+        from_email=settings.EMAIL_HOST_USER,
+    )
+    return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(ListOrCreateOrDestroy):

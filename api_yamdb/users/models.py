@@ -30,7 +30,9 @@ class User(AbstractUser):
         blank=True,
     )
     role = models.CharField(
-        'Роль', choices=ROLE_CHOICES, max_length=9, default=USER
+        'Роль', choices=ROLE_CHOICES, 
+        max_length=9, default=USER, 
+        error_messages={'validators': 'Выбрана несуществующая роль'}
     )
     confirmation_code = models.CharField(
         'confirmation_code', blank=True, max_length=128)
@@ -58,18 +60,12 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        if self.role == self.USER:
-            return True
-        return False
+        return self.role == self.USER
 
     @property
     def is_moderator(self):
-        if self.role == self.MODERATOR:
-            return True
-        return False
+        return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
-        if self.role == self.ADMIN:
-            return True
-        return False
+        return self.role == self.ADMIN

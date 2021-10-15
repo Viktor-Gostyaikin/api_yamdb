@@ -1,18 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework import permissions
 
 from rest_framework import permissions
+
+from .utils import check_role
 
 User = get_user_model()
-
-
-def check_role(request, *args):
-    if request.user.is_authenticated:
-        if request.user.role in args:
-            return True
-        elif request.user.is_superuser:
-            return True
-    return False
 
 
 class ReadOrAdminOnly(permissions.BasePermission):
