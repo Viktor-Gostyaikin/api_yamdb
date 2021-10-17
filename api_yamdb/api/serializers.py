@@ -10,6 +10,7 @@ from reviews.models import Category, Comment, Genre, Review, Title
 
 from .fields import ConfirmationCodeField
 
+
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
 
 User = get_user_model()
