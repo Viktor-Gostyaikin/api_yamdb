@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+
 from rest_framework import permissions
 
 from .utils import check_role
+
 
 User = get_user_model()
 
