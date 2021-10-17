@@ -10,7 +10,6 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from .fields import ConfirmationCodeField
 
 UNIQUE_REVIEW = 'Вы уже оставили отзыв к данному произведению'
-ERROR_SCORE = 'Оценка произведения должна быть в значении от 1 до 10'
 
 User = get_user_model()
 
