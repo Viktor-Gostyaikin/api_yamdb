@@ -2,7 +2,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -10,8 +9,9 @@ from rest_framework.filters import SearchFilter
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenViewBase
 
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework_simplejwt.views import TokenViewBase
 from reviews.models import Category, Genre, Review, Title
 
 from .filter import TitleFilter
@@ -23,7 +23,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, UserMeSerializer,
                           UserRegistrationSerializer, UserSerializer)
-
 
 User = get_user_model()
 

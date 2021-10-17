@@ -4,7 +4,6 @@ from rest_framework import permissions
 
 from .utils import check_role
 
-
 User = get_user_model()
 
 
