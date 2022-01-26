@@ -96,3 +96,9 @@ YaMDB отправляет письмо с кодом подтверждения
 | Security Scheme Type   | API Key |
 |------------------------|--------:|
 | Header parameter name  |Bearer   |
+
+### Над проектом работали
+https://github.com/Viktor-Gostyaikin
+https://github.com/DevCatRain
+https://github.com/dan1k-aby
+
