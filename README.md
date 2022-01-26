@@ -98,7 +98,7 @@ YaMDB отправляет письмо с кодом подтверждения
 | Header parameter name  |Bearer   |
 
 ### Над проектом работали
-https://github.com/Viktor-Gostyaikin
-https://github.com/DevCatRain
-https://github.com/dan1k-aby
+##### [Viktor-Gostyaikin](https://github.com/Viktor-Gostyaikin)
+##### [DevCatRain](https://github.com/DevCatRain)
+##### [dan1k-aby](https://github.com/dan1k-aby)
 
